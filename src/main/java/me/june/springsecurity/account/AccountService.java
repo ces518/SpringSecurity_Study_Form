@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 public class AccountService implements UserDetailsService {
 
     private final AccountRepository accountRepository;
+    private final PasswordEncoder passwordEncoder;
 
     // Database에서 조회해서 UserDetails Type으로 Return 해줘야함
     @Override
@@ -37,7 +38,7 @@ public class AccountService implements UserDetailsService {
     }
 
     public Account createAccount(Account account) {
-        account.encodePassword();
+        account.encodePassword(passwordEncoder);
         return accountRepository.save(account);
     }
 }
