@@ -1,5 +1,7 @@
 package me.june.springsecurity;
 
+import me.june.springsecurity.account.Account;
+import me.june.springsecurity.account.AccountContext;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -30,9 +32,16 @@ public class SampleService {
         // Authorities 사용자의 권한을 의미 하는 객체 이다. User 객체를 만들때 roles 에 추가한 권한 객체 들이다.
         Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
 
-        // Holder가 Authentication을 담고있음
-        // ThreadLocal 을 사용한다.
-        // 애플리케이션 어디서든 접근이 가능하다.
-        // 처리하는 Thread가 달라진다면, 제대로된 Authentication 정보를 받아오지 못한다.
+        //        // Holder가 Authentication을 담고있음
+        //        // ThreadLocal 을 사용한다.
+        //        // 애플리케이션 어디서든 접근이 가능하다.
+        //        // 처리하는 Thread가 달라진다면, 제대로된 Authentication 정보를 받아오지 못한다.
+
+
+        /*
+            AccountContext에 저장된 account객체를 꺼내온다.
+        */
+        Account account = AccountContext.getAccount();
+        System.out.println("username = " + account.getUsername());
     }
 }
