@@ -6,6 +6,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.access.AccessDecisionManager;
+import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
+import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -13,6 +17,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
+import org.springframework.security.web.access.expression.WebExpressionVoter;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Created by IntelliJ IDEA.
@@ -45,13 +54,39 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
+    /* 기본 accessDecisionManager를 사용하지 않고 커스터마이징 한다 */
+    public AccessDecisionManager accessDecisionManager () {
+        DefaultWebSecurityExpressionHandler securityExpressionHandler = expressionHandler();
+
+        WebExpressionVoter expressionVoter = new WebExpressionVoter();
+        // WebExpressionVoter가 사용하는 expressionHandler를 커스터마이징 해주어야한다.
+        expressionVoter.setExpressionHandler(securityExpressionHandler);
+        List<AccessDecisionVoter<? extends Object>> voters = Arrays.asList(expressionVoter);
+        return new AffirmativeBased(voters);
+    }
+
+    public DefaultWebSecurityExpressionHandler expressionHandler () {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        // ROLE_ADMIN은 ROLE_USER의 상위권한이라는것을 정의해준다.
+        roleHierarchy.setHierarchy("ROLE_ADMIN > ROLE_USER");
+
+        // WebExpressionVoter 는 expressionHandler를 사용한다.
+        // Voter가 사용하는 expressionHandler에게 Hierarchy를 설정
+        DefaultWebSecurityExpressionHandler securityExpressionHandler = new DefaultWebSecurityExpressionHandler();
+        // Hierarchy 커스터마이징
+        securityExpressionHandler.setRoleHierarchy(roleHierarchy);
+        return securityExpressionHandler;
+    }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .mvcMatchers("/", "/info", "/account/**").permitAll()
                 .mvcMatchers("/admin").hasRole("ADMIN")
+                .mvcMatchers("/user").hasRole("USER")
                 .anyRequest().authenticated()
+//                .accessDecisionManager(accessDecisionManager())
+                .expressionHandler(expressionHandler())
                 .and()
             .formLogin()
                 .and()
