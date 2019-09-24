@@ -12,8 +12,7 @@ public class SecurityLogger {
 
     public static void log (String message) {
         System.out.println(message);
-        Thread thread = new Thread();
-        System.out.println(thread.getName());
+        System.out.println(Thread.currentThread().getName());
         Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         System.out.println(principal);
     }
