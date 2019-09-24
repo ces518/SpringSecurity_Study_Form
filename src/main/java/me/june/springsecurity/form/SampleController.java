@@ -84,4 +84,14 @@ public class SampleController {
         };
         // postprocessing
     }
+
+    // async한 service 호출
+    @GetMapping("/async-service")
+    @ResponseBody
+    public String asyncService () {
+        SecurityLogger.log("MVC, before Async");
+        sampleService.asyncService(); // asyncService내의 메세지가 먼저 호출될지 순서가 보장되지 않는다.
+        SecurityLogger.log("MVC, After Async");
+        return "Async Service";
+    }
 }
