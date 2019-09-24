@@ -2,6 +2,8 @@ package me.june.springsecurity;
 
 import me.june.springsecurity.account.Account;
 import me.june.springsecurity.account.AccountContext;
+import me.june.springsecurity.common.SecurityLogger;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
@@ -43,5 +45,15 @@ public class SampleService {
         */
         Account account = AccountContext.getAccount();
         System.out.println("username = " + account.getUsername());
+    }
+
+    // 특정 빈안에 메서드를 호출할때 별도의 스레드를 생성하여 비동기적인 처리를 한다.
+    // 현재상태로 @Async 애노테이션만 사용했다면 아무런일도 벌어지지않고, 순서대로 호출이됨.
+    // @Async만 사용한다고 되는것이 아니다.
+    @Async
+    public void asyncService() {
+        SecurityLogger.log("Async Service");
+        System.out.println("Async Service is Called");
+        // 현재 상태로는 SecurityContext가 공유되지 않는다.
     }
 }
