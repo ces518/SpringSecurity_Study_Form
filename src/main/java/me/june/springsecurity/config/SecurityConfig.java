@@ -97,6 +97,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and()
             .formLogin()
                 .and()
+            .logout()
+                .logoutUrl("/my/logout")// 기본은 /logout
+                .logoutSuccessUrl("/")
+                .invalidateHttpSession(false) // 기본값은 true
+                .deleteCookies("COOKIE_NAME") // 쿠키기반의 인증을 사용하고있다면 해당 쿠키를 제거한다.
+                .and()
             .httpBasic();
 
         // 현재 스레드에서 하위 스레드가 생성되는경우 해당 스레드까지 공유된다.
