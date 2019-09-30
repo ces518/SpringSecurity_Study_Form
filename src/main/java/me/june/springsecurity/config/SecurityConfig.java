@@ -96,9 +96,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .expressionHandler(expressionHandler())
                 .and()
             .formLogin()
+                .usernameParameter("username")
+                .passwordParameter("password")
+                .loginPage("/login")
+                .permitAll()
                 .and()
             .logout()
-                .logoutUrl("/my/logout")// 기본은 /logout
+                .logoutUrl("/logout")// 기본은 /logout
                 .logoutSuccessUrl("/")
                 .invalidateHttpSession(false) // 기본값은 true
                 .deleteCookies("COOKIE_NAME") // 쿠키기반의 인증을 사용하고있다면 해당 쿠키를 제거한다.
