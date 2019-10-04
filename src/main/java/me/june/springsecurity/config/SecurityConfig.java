@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -112,6 +113,28 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // 현재 스레드에서 하위 스레드가 생성되는경우 해당 스레드까지 공유된다.
         // SecurityContextHolder 는 다양한 Strategy가 존재하는데 기본 전략은 ThreadLocal 임.
         SecurityContextHolder.setStrategyName(SecurityContextHolder.MODE_INHERITABLETHREADLOCAL);
+
+        http.anonymous()
+                .principal("anonymousUser")
+                .authorities("ROLE_ANONYMOUS");
+
+        http.sessionManagement()
+                .sessionFixation()
+                .migrateSession(); // 인증 성공시 세션 전략
+
+        http.sessionManagement()
+                .invalidSessionUrl("/login"); // 유효하지않은 세션 접근시 URL 설정
+
+        http.sessionManagement() // 최대 세션을 1로 설정
+                .maximumSessions(1)
+                .maxSessionsPreventsLogin(false); // 중복로그인시 이전 로그인했던 세션이 만료된다. (기본 전략), true 시 이전 세션을 유지한다.
+
+        http.sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED); // 세션 생성 전략 기본값: 필요하면 생성한다.
+        // NEVER : 시큐리티에서는 생성하지않는다. 하지만 기존에 세션이 있다면 사용한다. 대부분의 경우에 이미 세션이 존재하기 때문에 사용하게됨
+        // STATELESS : 세션이 존재하여도 쓰지않는다. (세션을 정말 쓰고싶지 않은경우) SecurityContext를 캐싱해서 사용해야하는데 캐싱을 하지 않는다., RESTAPI에서 사용해야하는 전략, 폼기반 인증에선 어울리지 않는다.
+        // RequestCacheAwareFilter 도 Session을 사용하기 때문에 이 필터의 기능도 동작하지 않는다.
+        // AWAYS : 항상 생성한다.
     }
 
     /*
