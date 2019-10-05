@@ -7,6 +7,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.access.AccessDecisionManager;
 import org.springframework.security.access.AccessDecisionVoter;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.access.vote.AffirmativeBased;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -15,11 +16,17 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
@@ -135,6 +142,33 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         // STATELESS : 세션이 존재하여도 쓰지않는다. (세션을 정말 쓰고싶지 않은경우) SecurityContext를 캐싱해서 사용해야하는데 캐싱을 하지 않는다., RESTAPI에서 사용해야하는 전략, 폼기반 인증에선 어울리지 않는다.
         // RequestCacheAwareFilter 도 Session을 사용하기 때문에 이 필터의 기능도 동작하지 않는다.
         // AWAYS : 항상 생성한다.
+
+        // ExceptionTranslationFilter -> SecurityInterceptor 밀접한 관계가 있음
+        // ExceptionTranslationFilter 가 SecurityInterceptor 이전에 존재해야함
+        // SecurityInterceptor 를 감싸고 있다.
+        // ExceptionTranslationFilter 가 try catch블록으로 감싸고 SecurityInterceptor 를 실행한다.
+        // SecurityInterceptor가 실제 인가 처리를한다.
+        // (AccessDecisionManager) -> AffirmativeBased (기본구현체)
+        // 두가지 예외가 발생할 수 있음
+        // 1. AuthenticationException 인증 관련
+        // 2. AccessDeniedException 인가가 안됨
+        // 두 예외가 따라 각기 다른 처리를한다.
+        // 인증이 안된경우 => AuthenticationEntryPoint를 사용하여 처리를함.
+        // -> 해당 유저를 로그인 하게끔 유도한다. 커스텀할 필요가 없다고 판단
+        // 인가가 안된경우 => AccessDeniedHandler를 사용하여 처리를함
+        // -> 기본 처리는 403 에러페이지를 보여줌
+        // 인가가 안된경우 보여줄 페이지
+        http.exceptionHandling()
+                .accessDeniedPage("/access-denied")
+                .accessDeniedHandler(new AccessDeniedHandler() { // 별도의 클래스로 분리하는것이 좋다.
+                    @Override
+                    public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
+                        UserDetails principal = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+                        String username = principal.getUsername();
+                        System.out.println(username + "is denied to access" + request.getRequestURI()); // 요청실패 로깅
+                        response.sendRedirect("/access-denied");
+                    }
+                });
     }
 
     /*
