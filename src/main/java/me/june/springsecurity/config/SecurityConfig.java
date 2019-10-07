@@ -1,6 +1,7 @@
 package me.june.springsecurity.config;
 
 import me.june.springsecurity.account.AccountService;
+import me.june.springsecurity.filters.LoggingFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.access.expression.WebExpressionVoter;
+import org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -178,6 +180,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         http.rememberMe()
             .userDetailsService(accountService);
+
+
+        // addFilter 메서드들을 통해 필터를 추가할수 있다.
+        // 특정 필터의 앞에 추가하거나, 특정 필터의 뒤에 추가하는 등 메서드를 제공한다.
+        // 우리가 구현한 로깅필터를 가장 맨앞에 존재하던 Filter의 앞쪽에 추가하는 코드
+        // 즉 우리가 추가한 필터가 Spring Security의 1순위 필터가 된다.
+        http.addFilterBefore(new LoggingFilter(), WebAsyncManagerIntegrationFilter.class);
+
     }
 
     /*
