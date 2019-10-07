@@ -1,5 +1,7 @@
 package me.june.springsecurity.config;
 
+import me.june.springsecurity.account.AccountService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,9 +43,12 @@ import java.util.List;
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    /*
     @Autowired
     AccountService accountService;
+
+
+    /*
+
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -169,6 +174,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                         response.sendRedirect("/access-denied");
                     }
                 });
+
+
+        http.rememberMe()
+            .userDetailsService(accountService);
     }
 
     /*

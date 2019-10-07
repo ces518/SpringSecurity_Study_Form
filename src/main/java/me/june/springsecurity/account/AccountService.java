@@ -3,6 +3,7 @@ package me.june.springsecurity.account;
 import lombok.RequiredArgsConstructor;
 import me.june.springsecurity.account.Account;
 import me.june.springsecurity.account.AccountRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -17,11 +18,13 @@ import org.springframework.stereotype.Service;
  * Time: 3:24 오후
  **/
 @Service
-@RequiredArgsConstructor
 public class AccountService implements UserDetailsService {
 
-    private final AccountRepository accountRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private AccountRepository accountRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     // Database에서 조회해서 UserDetails Type으로 Return 해줘야함
     @Override
