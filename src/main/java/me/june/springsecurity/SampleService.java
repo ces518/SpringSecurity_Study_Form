@@ -4,12 +4,16 @@ import me.june.springsecurity.account.Account;
 import me.june.springsecurity.account.AccountContext;
 import me.june.springsecurity.common.SecurityLogger;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.security.RolesAllowed;
 import java.util.Collection;
 
 /**
@@ -21,6 +25,11 @@ import java.util.Collection;
 @Service
 public class SampleService {
 
+    @Secured("ROLE_USER")
+    @RolesAllowed("ROLE_USER")
+    @PreAuthorize("hasRole('USER')")
+    @PostAuthorize("hasRole('USER')")
+    @PostAuthorize("returnObject.username == authntication.principal.nickName")
     public void dashboard () {
         // SecurityContextHolder를 통해 SecurityContext에 접근이 가능하다.
         SecurityContext context = SecurityContextHolder.getContext();
@@ -42,9 +51,11 @@ public class SampleService {
 
         /*
             AccountContext에 저장된 account객체를 꺼내온다.
+
+            Account account = AccountContext.getAccount();
+            System.out.println("username = " + account.getUsername());
         */
-        Account account = AccountContext.getAccount();
-        System.out.println("username = " + account.getUsername());
+
     }
 
     // 특정 빈안에 메서드를 호출할때 별도의 스레드를 생성하여 비동기적인 처리를 한다.
