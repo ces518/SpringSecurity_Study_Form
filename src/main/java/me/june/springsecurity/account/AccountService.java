@@ -1,10 +1,6 @@
 package me.june.springsecurity.account;
 
-import lombok.RequiredArgsConstructor;
-import me.june.springsecurity.account.Account;
-import me.june.springsecurity.account.AccountRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -33,11 +29,7 @@ public class AccountService implements UserDetailsService {
         if (account == null) {
             throw new UsernameNotFoundException(username);
         }
-        return User.builder()
-                .username(account.getUsername())
-                .password(account.getPassword())
-                .roles(account.getRole())
-                .build();
+        return new UserAccount(account);
     }
 
     public Account createAccount(Account account) {

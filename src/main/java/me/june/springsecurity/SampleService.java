@@ -28,7 +28,7 @@ public class SampleService {
     @Secured("ROLE_USER")
     @RolesAllowed("ROLE_USER")
     @PreAuthorize("hasRole('USER')")
-    @PostAuthorize("hasRole('USER')")
+//    @PostAuthorize("hasRole('USER')")
     @PostAuthorize("returnObject.username == authntication.principal.nickName")
     public void dashboard () {
         // SecurityContextHolder를 통해 SecurityContext에 접근이 가능하다.

@@ -2,10 +2,15 @@ package me.june.springsecurity.form;
 
 import lombok.RequiredArgsConstructor;
 import me.june.springsecurity.SampleService;
+import me.june.springsecurity.account.Account;
 import me.june.springsecurity.account.AccountContext;
 import me.june.springsecurity.account.AccountRepository;
+import me.june.springsecurity.account.UserAccount;
+import me.june.springsecurity.common.AuthUser;
 import me.june.springsecurity.common.SecurityLogger;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,11 +33,12 @@ public class SampleController {
     private final SampleService sampleService;
 
     @GetMapping("/")
-    public String index (Model model, Principal principal) {
-        if (principal == null) {
+    public String index (Model model,
+                         @AuthUser Account account) {
+        if (account == null) {
             model.addAttribute("message", "Hello Spring Security");
         } else {
-            model.addAttribute("message", "Hello Index" + principal.getName());
+            model.addAttribute("message", "Hello Index" + account.getUsername());
         }
         return "index";
     }
