@@ -6,8 +6,10 @@ import me.june.springsecurity.account.Account;
 import me.june.springsecurity.account.AccountContext;
 import me.june.springsecurity.account.AccountRepository;
 import me.june.springsecurity.account.UserAccount;
+import me.june.springsecurity.book.BookRepository;
 import me.june.springsecurity.common.AuthUser;
 import me.june.springsecurity.common.SecurityLogger;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
@@ -31,6 +33,7 @@ public class SampleController {
 
     private final AccountRepository accountRepository;
     private final SampleService sampleService;
+    private final BookRepository bookRepository;
 
     @GetMapping("/")
     public String index (Model model,
@@ -63,6 +66,8 @@ public class SampleController {
     @GetMapping("/user")
     public String user (Model model, Principal principal) {
         model.addAttribute("message", "Hello " + principal.getName());
+        // 현재 user가 가지고있는 책의 목록
+        model.addAttribute("books", bookRepository.findCurrentUserBooks());
         return "user";
     }
 
